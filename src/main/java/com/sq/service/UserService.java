@@ -11,16 +11,16 @@ import com.sq.repo.RoleRepo;
 import com.sq.repo.UserRepo;
 
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 @Slf4j
 public class UserService {
 
+    @Autowired
     private  UserRepo userRepo;
+    @Autowired
     private RoleRepo roleRepo;
 
     public User saveUser(User user){
