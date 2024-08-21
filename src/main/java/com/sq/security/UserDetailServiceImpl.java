@@ -1,42 +1,40 @@
-package com.sq.service;
+package com.sq.security;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.sq.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.sq.entity.User;
+import com.sq.dto.AuthenticationDto;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class userDetailsServiceImpl implements UserDetailsService {
+public class UserDetailServiceImpl implements UserDetailsService {
 
     @Autowired
-    private UserService userService;
+    private AuthenticationService AuthenticationService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userService.getUser(username);
-        if(user == null){
-            log.info("User not found!!");
-            throw new UsernameNotFoundException("user not found ");
-        }else{
-            log.info("User found in DB",username);
+        AuthenticationDto authenticationDto = AuthenticationService.getUserByEmail(username);
+        if(authenticationDto == null){
+            log.info("user not found!!!");
+            throw new UsernameNotFoundException(username+" not found in DB");
         }
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        user.getRoles().forEach(role->{
+        authenticationDto.roles().forEach(role->{
             authorities.add(new SimpleGrantedAuthority(role.getName()));
         });
-        return new org.springframework.security.core.userdetails.User(user.getUsername(),user.getPassword(),authorities);
+        return new User(authenticationDto.email(),authenticationDto.password(),authorities);
     }
-
-    
-    
+     
 }
