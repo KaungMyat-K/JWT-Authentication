@@ -1,11 +1,13 @@
 package com.sq.service;
 
-import com.sq.dao.AuthenticationDao;
+import java.security.Principal;
+
 import com.sq.dto.AuthenticationDto;
+import com.sq.entity.UserEntity;
 
 public interface AuthenticationService {
     
-    AuthenticationDto getUserByEmail(String email);
+    UserEntity getUserByEmail(String email);
 
-    AuthenticationDto authenticate(AuthenticationDao authenticationDao);
+    AuthenticationDto authenticate(Principal principal);
 }

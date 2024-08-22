@@ -1,14 +1,14 @@
 package com.sq.service.impl;
 
+import java.security.Principal;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.sq.dao.AuthenticationDao;
 import com.sq.dto.AuthenticationDto;
+import com.sq.entity.UserEntity;
 import com.sq.repo.UserRepo;
+import com.sq.security.JwtService;
 import com.sq.service.AuthenticationService;
 
 @Service
@@ -18,22 +18,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private UserRepo userRepo;
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private JwtService jwtService;
+
 
     @Override
-    public AuthenticationDto getUserByEmail(String email) {
-        var user = userRepo.findByEmail(email)
-                    .orElseThrow(()->new UsernameNotFoundException(email + " not found in DB!!!"));
-        AuthenticationDto authenticationDto = new AuthenticationDto(user.getEmail(),user.getPassword(),user.getRoles());
-        return authenticationDto;
+    public UserEntity getUserByEmail(String email) {
+        var user = userRepo.findByEmail(email).get();
+        return user;
     }
 
 	@Override
-	public AuthenticationDto authenticate(AuthenticationDao authenticationDao) {
-		authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(authenticationDao.getEmail(),authenticationDao.getPassword())
-        );
-        return null;
+	public AuthenticationDto authenticate(Principal principal) {
+
+            var role = getUserByEmail(principal.getName()).getRoles();
+            String token = jwtService.generateJwtToken(principal.getName(),role.getName());
+            return new AuthenticationDto(principal.getName(), role, token);    
 	}
     
 }

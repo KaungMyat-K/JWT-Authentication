@@ -2,6 +2,7 @@ package com.sq.security;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,18 +21,22 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private int expriation;
 
-    public String generateJwtToken(String name){
+    public String generateJwtToken(String email,String authorization){
         return Jwts.builder()
-                .setSubject(name)
+                .setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis()+expriation))
-                
+                .setClaims(getClaimsFromUser(authorization))
                 .signWith(getSecretKey())
                 .compact();
     }
 
 
-
+    private Map<String,String> getClaimsFromUser(String authorization){
+        Map<String,String> authorities = new HashMap<>();
+        authorities.put("authorization", authorization);
+        return authorities;
+    }
 
 
     private SecretKey getSecretKey() {
